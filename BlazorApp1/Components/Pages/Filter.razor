@@ -1,0 +1,57 @@
+﻿@page "/Filter"
+@rendermode InteractiveServer
+
+<PageTitle>Filter</PageTitle>
+
+<FluentCard AreaRestricted="false">
+    <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment = "HorizontalAlignment.SpaceBetween">
+        <p class="fw-bold">Bộ lọc phân loại văn bản</p>
+        <FluentSelect Items=@docYears
+            OptionText = "@(i => i.Text)"
+            OptionValue = "@(i => i.Value)"
+            @bind-Value="@docYearValue" />
+    </FluentStack>
+    <FluentStack Orientation="Orientation.Horizontal">
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentTextField 
+                @bind-Value="searchInput" 
+                class = "w-100"
+                label="Từ khóa" 
+                placeholder="Nhập từ khóa..."
+                appearance="FluentInputAppearance.Outline">
+            </FluentTextField>
+        </FluentStack>
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentSelect Items=@docTypeOptions
+                class = "w-100"
+                label = "Loại văn bản"
+                OptionText = "@(i => i.Text)"
+                OptionValue = "@(i => i.Value)"
+                @bind-Value="@stringValue" />
+        </FluentStack>
+    </FluentStack>
+    <FluentStack Orientation="Orientation.Horizontal" class = "mt-4">
+        <FluentButton Appearance="Appearance.Accent" Color="white">Tìm kiếm</FluentButton>
+        <FluentButton>Làm mới</FluentButton>
+    </FluentStack>
+</FluentCard>
+
+@code {
+    private string searchInput = "";
+
+    string? stringValue = "-- Chọn --";
+    string? docYearValue = "2026";
+    static List<Option<string>> docTypeOptions = new()
+    {
+        { new Option<string> { Value = "none", Text = "-- Chọn --" } },
+        { new Option<string> { Value = "lvb1", Text = "Loại văn bản 1"} }
+
+    };
+
+    static List<Option<string>> docYears = new()
+    {
+        { new Option<string> { Value = "2026", Text = "2026" } },
+        { new Option<string> { Value = "2025", Text = "2025"} }
+
+    };
+}
