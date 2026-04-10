@@ -130,3 +130,9 @@ d:\code\simax\gd2\BlazorApp1\bin\Debug\net10.0\Blazored.LocalStorage.dll
 d:\code\simax\gd2\BlazorApp1\obj\Debug\net10.0\scopedcss\Components\Pages\Filter.razor.rz.scp.css
 d:\code\simax\gd2\BlazorApp1\obj\Debug\net10.0\compressed\fe95vulehx-{0}-ykj24p3kvo-ykj24p3kvo.gz
 d:\code\simax\gd2\BlazorApp1\obj\Debug\net10.0\compressed\e76fe7a2nx-{0}-ay8bbz8km4-ay8bbz8km4.gz
+d:\code\simax\gd2\BlazorApp1\obj\Debug\net10.0\BlazorApp1.sourcelink.json
+d:\code\simax\gd2\BlazorApp1\bin\Debug\net10.0\Microsoft.FluentUI.AspNetCore.Components.Icons.Color.dll
+d:\code\simax\gd2\BlazorApp1\bin\Debug\net10.0\Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.dll
+d:\code\simax\gd2\BlazorApp1\bin\Debug\net10.0\Microsoft.FluentUI.AspNetCore.Components.Icons.Light.dll
+d:\code\simax\gd2\BlazorApp1\bin\Debug\net10.0\Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.dll
+d:\code\simax\gd2\BlazorApp1\bin\Debug\net10.0\Microsoft.FluentUI.AspNetCore.Components.Icons.dll

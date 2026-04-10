@@ -1,0 +1,22 @@
+@implements IDialogContentComponent<Document>
+
+@using Microsoft.FluentUI.AspNetCore.Components
+@using BlazorApp1.Models
+
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+        <FluentTextField @bind-Value="@Content.Name" Label="Tên phân loại văn bản" Style="width: 100%;" />
+        <FluentTextField @bind-Value="@Content.ShortName" Label="Tên viết tắt" Style="width: 100%;" />
+        <FluentSelect Items="@Categories" 
+                      @bind-Value="@Content.Category" 
+                      Label="Phân loại" 
+                      class = "w-100" />
+    </FluentStack>
+</FluentDialogBody>
+
+@code {
+    [Parameter]
+    public Document Content { get; set; } = default!;
+
+    private List<string> Categories = new() { "Dự thảo", "Văn bản đến đơn vị", "Văn bản đến bộ" };
+}
