@@ -13,7 +13,9 @@
 
     <FluentDataGrid Items="@itemsQueryable" RowStyle="@(item => "height: 60px;")" Pagination="@pagination"
                     TGridItem="Document">
-        <PropertyColumn Title="#" Property="@(c => c.Id)" Width="5%" />
+        <TemplateColumn Title="#" Width="5%">
+            @(GetRowIndex(context))
+        </TemplateColumn>
         <TemplateColumn Title="Tên phân loại văn bản" Align="Align.Center">
             <a class="text-decoration-none" href="#">@context.Name</a>
         </TemplateColumn>
@@ -35,9 +37,10 @@
             <FluentSelect Items="@(new[] { "2", "5", "10" })" @bind-Value="@SelectedItemsPerPage" Width="fit-content" />
             <span>bản ghi</span>
         </div>
-        <div> Hiển thị @GetStartRecord() đến @GetEndRecord() của @(pagination.TotalItemCount ?? 0) bản ghi </div>
         <FluentPaginator State="@pagination">
-            <SummaryTemplate></SummaryTemplate>
+            <SummaryTemplate>
+                Hiển thị @GetStartRecord() đến @GetEndRecord() của @(itemsQueryable?.Count() ?? 0) bản ghi
+            </SummaryTemplate>
             <PaginationTextTemplate> Trang @(pagination.CurrentPageIndex + 1) / @(pagination.LastPageIndex + 1)
             </PaginationTextTemplate>
         </FluentPaginator>
@@ -129,16 +132,20 @@
         }
     }
     
-    private int GetStartRecord() => (pagination.TotalItemCount ?? 0) > 0 ? (pagination.CurrentPageIndex *
-pagination.ItemsPerPage) + 1 : 0;
+    private int GetStartRecord() => (itemsQueryable?.Count() ?? 0) > 0 ? (pagination.CurrentPageIndex * pagination.ItemsPerPage) + 1 : 0;
     
     private int GetEndRecord()
     {
         var end = (pagination.CurrentPageIndex + 1) * pagination.ItemsPerPage;
-        var total = pagination.TotalItemCount ?? 0;
+        var total = itemsQueryable?.Count() ?? 0;
         return end > total ? total : end;
     }
     
+    private int GetRowIndex(Document doc)
+    {
+        return (itemsQueryable?.ToList().IndexOf(doc) ?? -1) + 1;
+    }
+
     private async Task OpenAddDialogAsync()
     {
         Document newDocument = new() { Status = "Mới", Category = "Dự thảo" };
