@@ -1,0 +1,32 @@
+@page "/DocMana"
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý văn bản</PageTitle>
+
+<h2 class="mb-4">Quản lý văn bản</h2>
+
+<Filter OnSearch="OnFilterSearchAsync" OnReset="OnFilterResetAsync" />
+
+<div class="mt-4">
+    <List @ref="listComponent" />
+</div>
+
+@code {
+    private List listComponent = default!;
+
+    private async Task OnFilterSearchAsync((string Search, string Category) args)
+    {
+        if (listComponent != null)
+        {
+            await listComponent.FilterDataAsync(args.Search, args.Category);
+        }
+    }
+
+    private async Task OnFilterResetAsync()
+    {
+        if (listComponent != null)
+        {
+            await listComponent.ResetGridAsync();
+        }
+    }
+}

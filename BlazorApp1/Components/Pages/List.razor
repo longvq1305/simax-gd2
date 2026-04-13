@@ -1,54 +1,44 @@
-﻿@page "/"
-@rendermode InteractiveServer
-@using Microsoft.FluentUI.AspNetCore.Components
+﻿@using Microsoft.FluentUI.AspNetCore.Components
 @using Blazored.LocalStorage
 @using BlazorApp1.Models
 
 @inject ILocalStorageService LocalStorage
 @inject IDialogService DialogService
 
-@page "/List"
-
-<PageTitle>List</PageTitle>
-
 <FluentCard AreaRestricted="false">
     <FluentButton Color="white" Appearance="Appearance.Accent" OnClick="@OpenAddDialogAsync"
-                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.AddCircle())">
+                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.AddCircle())" class="mb-3">
         Thêm mới
     </FluentButton>
-    <FluentDataGrid Items="@itemsQueryable"  RowStyle = "@(item => "height: 60px;")" Pagination="@pagination" TGridItem="Document">
-        <PropertyColumn Title="#" Property="@(c => c.Id)" Width = "5%"/>
+
+    <FluentDataGrid Items="@itemsQueryable" RowStyle="@(item => "height: 60px;")" Pagination="@pagination"
+                    TGridItem="Document">
+        <PropertyColumn Title="#" Property="@(c => c.Id)" Width="5%" />
         <TemplateColumn Title="Tên phân loại văn bản" Align="Align.Center">
-            <a class = "text-decoration-none" href="#">@context.Name</a>
+            <a class="text-decoration-none" href="#">@context.Name</a>
         </TemplateColumn>
-        <PropertyColumn Title="Tên viết tắt" Property="@(c => c.ShortName)" Align="Align.Center"/>
-        <PropertyColumn Title="Phân loại" Property="@(c => c.Category)" Align="Align.Center"/>
+        <PropertyColumn Title="Tên viết tắt" Property="@(c => c.ShortName)" Align="Align.Center" />
+        <PropertyColumn Title="Phân loại" Property="@(c => c.Category)" Align="Align.Center" />
         <TemplateColumn Title="Trạng thái" Align="Align.Center">
             <FluentBadge Appearance="Appearance.Accent">@context.Status</FluentBadge>
         </TemplateColumn>
         <TemplateColumn Title="Thao tác" Align="Align.Center" Width="10%">
-            <FluentButton
-                class = "border"
-                IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Dismiss())"
-                OnClick="@(() => DeleteItem(context.Id))" Appearance="Appearance.Stealth" />
+            <FluentButton class="border"
+                          IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Dismiss())"
+                          OnClick="@(() => DeleteItem(context.Id))" Appearance="Appearance.Stealth" />
         </TemplateColumn>
     </FluentDataGrid>
+
     <div class="d-flex justify-content-between align-items-center mt-3">
-    
         <div class="d-flex align-items-center gap-2">
             <span>Hiển thị</span>
-            <FluentSelect Items="@(new[] { "2", "5" })" @bind-Value="@SelectedItemsPerPage" Width="fit-content" />
+            <FluentSelect Items="@(new[] { "2", "5", "10" })" @bind-Value="@SelectedItemsPerPage" Width="fit-content" />
             <span>bản ghi</span>
         </div>
-
-        <div>
-            Hiển thị @GetStartRecord() đến @GetEndRecord() của @(pagination.TotalItemCount ?? 0) bản ghi
-        </div>
-
+        <div> Hiển thị @GetStartRecord() đến @GetEndRecord() của @(pagination.TotalItemCount ?? 0) bản ghi </div>
         <FluentPaginator State="@pagination">
             <SummaryTemplate></SummaryTemplate>
-            <PaginationTextTemplate>
-                Trang @(pagination.CurrentPageIndex + 1) / @(pagination.LastPageIndex + 1)
+            <PaginationTextTemplate> Trang @(pagination.CurrentPageIndex + 1) / @(pagination.LastPageIndex + 1)
             </PaginationTextTemplate>
         </FluentPaginator>
     </div>
@@ -57,6 +47,7 @@
 @code {
     PaginationState pagination = new PaginationState { ItemsPerPage = 2 };
     List<Document> documentList = new List<Document>();
+    
     IQueryable<Document>? itemsQueryable;
     private const string StorageKey = "document_data";
 
@@ -64,15 +55,14 @@
     {
         if (firstRender)
         {
-            List<Document>? savedData = await LocalStorage.GetItemAsync<List<Document>>(StorageKey);
-            
+            var savedData = await LocalStorage.GetItemAsync<List<Document>>(StorageKey);
             if (savedData == null || !savedData.Any())
             {
                 documentList = new List<Document>
                 {
-                    new() { Id = 1, Name = "Văn bản dự thảo của đơn vị", ShortName = "VBDTDV", Category = "Dự thảo" },
-                    new() { Id = 2, Name = "Loại văn bản", ShortName = "LVB", Category = "Văn bản đến đơn vị" },
-                    new() { Id = 3, Name = "Công điện", ShortName = "CĐ", Category = "Văn bản đến bộ" }
+                    new() { Id = 1, Name = "Văn bản dự thảo của đơn vị", ShortName = "VBDTDV", Category = "Dự thảo", Status = "Mới" },
+                    new() { Id = 2, Name = "Loại văn bản", ShortName = "LVB", Category = "Văn bản đến đơn vị", Status = "Mới" },
+                    new() { Id = 3, Name = "Công điện", ShortName = "CĐ", Category = "Văn bản đến bộ", Status = "Mới" }
                 };
                 await LocalStorage.SetItemAsync(StorageKey, documentList);
             }
@@ -80,14 +70,39 @@
             {
                 documentList = savedData;
             }
-            pagination.TotalItemCountChanged += (sender, eventArgs) => StateHasChanged();
-            UpdateGrid();
+            
+            itemsQueryable = documentList.AsQueryable();
+            StateHasChanged();
         }
     }
 
-    private void UpdateGrid()
+    public async Task FilterDataAsync(string keyword, string category)
+    {
+        var query = documentList.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            query = query.Where(d =>
+                (d.Name != null && d.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                (d.ShortName != null && d.ShortName.Contains(keyword, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            query = query.Where(d => d.Category == category);
+        }
+
+        var filteredList = query.ToList();
+        itemsQueryable = filteredList.AsQueryable();
+        
+        await pagination.SetCurrentPageIndexAsync(0);
+        StateHasChanged();
+    }
+
+    public async Task ResetGridAsync()
     {
         itemsQueryable = documentList.AsQueryable();
+        await pagination.SetCurrentPageIndexAsync(0);
         StateHasChanged();
     }
 
@@ -95,7 +110,8 @@
     {
         documentList.RemoveAll(x => x.Id == id);
         await LocalStorage.SetItemAsync(StorageKey, documentList);
-        UpdateGrid();
+        itemsQueryable = documentList.AsQueryable();
+        StateHasChanged();
     }
 
     private string _selectedItemsPerPage = "2";
@@ -112,47 +128,36 @@
             }
         }
     }
-
-
-    private int GetStartRecord()
-    {
-        return (pagination.CurrentPageIndex * pagination.ItemsPerPage) + 1;
-    }
-
+    
+    private int GetStartRecord() => (pagination.TotalItemCount ?? 0) > 0 ? (pagination.CurrentPageIndex *
+pagination.ItemsPerPage) + 1 : 0;
+    
     private int GetEndRecord()
     {
         var end = (pagination.CurrentPageIndex + 1) * pagination.ItemsPerPage;
         var total = pagination.TotalItemCount ?? 0;
         return end > total ? total : end;
     }
-    private async Task GoToPageAsync(int pageIndex) => await pagination.SetCurrentPageIndexAsync(pageIndex);
+    
     private async Task OpenAddDialogAsync()
     {
-        Document newDocument = new() { Status = "hehe", Category = "Dự thảo" };
-
+        Document newDocument = new() { Status = "Mới", Category = "Dự thảo" };
         var dialog = await DialogService.ShowDialogAsync<AddDocumentDialog>(newDocument, new DialogParameters()
         {
-            Height = "400px",
+            Height =
+"400px",
             Title = "Thêm mới văn bản",
-            PreventDismissOnOverlayClick = true,
             PrimaryAction = "Lưu",
-            SecondaryAction = "Hủy",
+            SecondaryAction = "Hủy"
         });
-
         var result = await dialog.Result;
-
         if (!result.Cancelled && result.Data != null)
         {
             var itemToAdd = (Document)result.Data;
-        
-            // Tự động tăng ID
             itemToAdd.Id = documentList.Any() ? documentList.Max(d => d.Id) + 1 : 1;
-        
             documentList.Add(itemToAdd);
-        
-            // Lưu vào LocalStorage và cập nhật Grid
             await LocalStorage.SetItemAsync(StorageKey, documentList);
-            UpdateGrid();
+            await ResetGridAsync();
         }
     }
 }

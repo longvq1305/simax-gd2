@@ -1,57 +1,65 @@
-﻿@page "/Filter"
-@rendermode InteractiveServer
-
-<PageTitle>Filter</PageTitle>
-
-<FluentCard AreaRestricted="false">
-    <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment = "HorizontalAlignment.SpaceBetween">
+﻿<FluentCard AreaRestricted="false" class="mb-3">
+    <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween">
         <p class="fw-bold">Bộ lọc phân loại văn bản</p>
-        <FluentSelect Items=@docYears
-            OptionText = "@(i => i.Text)"
-            OptionValue = "@(i => i.Value)"
-            @bind-Value="@docYearValue" />
+        <FluentSelect Items=@docYears OptionText="@(i => i.Text)" OptionValue="@(i => i.Value)" @bind-Value="@docYearValue" />
     </FluentStack>
-    <FluentStack Orientation="Orientation.Horizontal">
-        <FluentStack Orientation="Orientation.Vertical">
-            <FluentTextField 
-                @bind-Value="searchInput" 
-                class = "w-100"
-                label="Từ khóa" 
-                placeholder="Nhập từ khóa..."
-                appearance="FluentInputAppearance.Outline">
+    <FluentStack Orientation="Orientation.Horizontal" class="mt-2">
+        <FluentStack Orientation="Orientation.Vertical" Width="50%">
+            <FluentTextField @bind-Value="searchInput"
+                             class="w-100"
+                             Label="Từ khóa"
+                             Placeholder="Nhập từ khóa..."
+                             Appearance="FluentInputAppearance.Outline">
             </FluentTextField>
         </FluentStack>
-        <FluentStack Orientation="Orientation.Vertical">
+        <FluentStack Orientation="Orientation.Vertical" Width="50%">
             <FluentSelect Items=@docTypeOptions
-                class = "w-100"
-                label = "Loại văn bản"
-                OptionText = "@(i => i.Text)"
-                OptionValue = "@(i => i.Value)"
-                @bind-Value="@stringValue" />
+                          class="w-100"
+                          Label="Loại văn bản"
+                          OptionText="@(i => i.Text)"
+                          OptionValue="@(i => i.Value)"
+                          @bind-Value="@selectedCategory" />
         </FluentStack>
     </FluentStack>
-    <FluentStack Orientation="Orientation.Horizontal" class = "mt-4">
-        <FluentButton Appearance="Appearance.Accent" Color="white">Tìm kiếm</FluentButton>
-        <FluentButton>Làm mới</FluentButton>
+    <FluentStack Orientation="Orientation.Horizontal" class="mt-4">
+        <FluentButton Appearance="Appearance.Accent" Color="white" OnClick="@HandleSearchAsync">Tìm kiếm</FluentButton>
+        <FluentButton OnClick="@HandleResetAsync">Làm mới</FluentButton>
     </FluentStack>
 </FluentCard>
 
 @code {
-    private string searchInput = "";
+    [Parameter] public EventCallback<(string Search, string Category)> OnSearch { get; set; }
+    [Parameter] public EventCallback OnReset { get; set; }
 
-    string? stringValue = "-- Chọn --";
-    string? docYearValue = "2026";
+    private string searchInput = "";
+    private string? selectedCategory = "";
+    private string? docYearValue = "2026";
+
     static List<Option<string>> docTypeOptions = new()
     {
-        { new Option<string> { Value = "none", Text = "-- Chọn --" } },
-        { new Option<string> { Value = "lvb1", Text = "Loại văn bản 1"} }
-
+        new Option<string> { Value = "", Text = "-- Chọn --" },
+        new Option<string> { Value = "Dự thảo", Text = "Dự thảo" },
+        new Option<string> { Value = "Văn bản đến đơn vị", Text = "Văn bản đến đơn vị" },
+        new Option<string> { Value = "Văn bản đến bộ", Text = "Văn bản đến bộ" }
     };
 
     static List<Option<string>> docYears = new()
     {
-        { new Option<string> { Value = "2026", Text = "2026" } },
-        { new Option<string> { Value = "2025", Text = "2025"} }
-
+        new Option<string> { Value = "2026", Text = "2026" },
+        new Option<string> { Value = "2025", Text = "2025" }
     };
+
+    private async Task HandleSearchAsync()
+    {
+        await Task.Delay(50);
+        await OnSearch.InvokeAsync((searchInput ?? "", selectedCategory ?? ""));
+    }
+
+    private async Task HandleResetAsync()
+    {
+        searchInput = "";
+        selectedCategory = "";
+        docYearValue = "2026";
+        await OnReset.InvokeAsync();
+    }
 }
